@@ -19,8 +19,8 @@ type AlgoOrderPlaceWsService struct {
 }
 
 // NewAlgoOrderPlaceWsService init AlgoOrderPlaceWsService
-func NewAlgoOrderPlaceWsService(apiKey, secretKey string) (*AlgoOrderPlaceWsService, error) {
-	conn, err := websocket.NewConnection(futures.WsApiInitReadWriteConn, futures.WebsocketKeepalive, futures.WebsocketTimeoutReadWriteConnection)
+func NewAlgoOrderPlaceWsService(apiKey, secretKey string, opts []common.WsOption) (*AlgoOrderPlaceWsService, error) {
+	conn, err := websocket.NewConnection(futures.WrapWsApiInitReadWriteConn(opts...), futures.WebsocketKeepalive, futures.WebsocketTimeoutReadWriteConnection)
 	if err != nil {
 		return nil, err
 	}
