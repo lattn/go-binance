@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/adshao/go-binance/v2/common"
 )
 
 // Integration tests for the /public, /market, /private WS endpoint routing.
@@ -828,8 +830,6 @@ func TestWsEndpoints_Demo_Market_CompositeIndex(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Market_AggTrade(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
 	got := make(chan struct{}, 1)
 	doneC, stopC, err := WsAggTradeServe("BTCUSDT", func(e *WsAggTradeEvent) {
@@ -838,7 +838,7 @@ func TestWsEndpoints_Testnet_Market_AggTrade(t *testing.T) {
 		case got <- struct{}{}:
 		default:
 		}
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -855,8 +855,6 @@ func TestWsEndpoints_Testnet_Market_AggTrade(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Market_CombinedMarkPrice(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
 	got := make(chan struct{}, 1)
 	doneC, stopC, err := WsCombinedMarkPriceServe([]string{"BTCUSDT", "ETHUSDT"}, func(e *WsMarkPriceEvent) {
@@ -865,7 +863,7 @@ func TestWsEndpoints_Testnet_Market_CombinedMarkPrice(t *testing.T) {
 		case got <- struct{}{}:
 		default:
 		}
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -882,8 +880,6 @@ func TestWsEndpoints_Testnet_Market_CombinedMarkPrice(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Public_BookTicker(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
 	got := make(chan struct{}, 1)
 	doneC, stopC, err := WsBookTickerServe("BTCUSDT", func(e *WsBookTickerEvent) {
@@ -892,7 +888,7 @@ func TestWsEndpoints_Testnet_Public_BookTicker(t *testing.T) {
 		case got <- struct{}{}:
 		default:
 		}
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -909,8 +905,6 @@ func TestWsEndpoints_Testnet_Public_BookTicker(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Public_CombinedDepth(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
 	got := make(chan struct{}, 1)
 	doneC, stopC, err := WsCombinedDepthServe(map[string]string{"BTCUSDT": "5"}, func(e *WsDepthEvent) {
@@ -919,7 +913,7 @@ func TestWsEndpoints_Testnet_Public_CombinedDepth(t *testing.T) {
 		case got <- struct{}{}:
 		default:
 		}
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -936,10 +930,8 @@ func TestWsEndpoints_Testnet_Public_CombinedDepth(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Private_UserData(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
-	client := NewClient(os.Getenv("BINANCE_APIKEY"), os.Getenv("BINANCE_SECRET"))
+	client := NewClient(os.Getenv("BINANCE_APIKEY"), os.Getenv("BINANCE_SECRET"), common.UseTestnet(true))
 	listenKey, err := client.NewStartUserStreamService().Do(context.Background())
 	if err != nil {
 		t.Fatalf("listen key: %v (testnet may need different keys)", err)
@@ -948,7 +940,7 @@ func TestWsEndpoints_Testnet_Private_UserData(t *testing.T) {
 
 	doneC, stopC, err := WsUserDataServe(listenKey, func(e *WsUserDataEvent) {
 		fmt.Printf("  [testnet/private] userData event\n")
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -1106,8 +1098,6 @@ func TestWsEndpoints_Demo_Private_UserDataMultiple(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Market_AssetIndex(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
 	got := make(chan struct{}, 1)
 	doneC, stopC, err := WsAssetIndexServe("BTCUSD", func(e *WsAssetIndexEvent) {
@@ -1116,7 +1106,7 @@ func TestWsEndpoints_Testnet_Market_AssetIndex(t *testing.T) {
 		case got <- struct{}{}:
 		default:
 		}
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -1133,10 +1123,8 @@ func TestWsEndpoints_Testnet_Market_AssetIndex(t *testing.T) {
 
 func TestWsEndpoints_Testnet_Private_UserDataWithEvents(t *testing.T) {
 	requireKeys(t)
-	UseTestnet = true
-	defer func() { UseTestnet = false }()
 
-	client := NewClient(os.Getenv("BINANCE_APIKEY"), os.Getenv("BINANCE_SECRET"))
+	client := NewClient(os.Getenv("BINANCE_APIKEY"), os.Getenv("BINANCE_SECRET"), common.UseTestnet(true))
 	listenKey, err := client.NewStartUserStreamService().Do(context.Background())
 	if err != nil {
 		t.Fatalf("listen key: %v", err)
@@ -1146,7 +1134,7 @@ func TestWsEndpoints_Testnet_Private_UserDataWithEvents(t *testing.T) {
 	events := []string{"ORDER_TRADE_UPDATE", "ACCOUNT_UPDATE"}
 	doneC, stopC, err := WsUserDataServeWithEvents(listenKey, events, func(e *WsUserDataEvent) {
 		fmt.Printf("  [testnet/private] userData with events: %s\n", e.Event)
-	}, func(err error) { t.Logf("err: %v", err) })
+	}, func(err error) { t.Logf("err: %v", err) }, common.UseTestnet(true))
 	if err != nil {
 		t.Fatalf("connect: %v", err)
 	}

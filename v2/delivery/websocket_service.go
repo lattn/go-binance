@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/adshao/go-binance/v2/common"
 )
 
 // Endpoints
@@ -23,16 +25,14 @@ var (
 	WebsocketPongTimeout = time.Second * 10
 	// WebsocketKeepalive enables sending ping/pong messages to check the connection stability
 	WebsocketKeepalive = true
-	// UseTestnet switch all the WS streams from production to the testnet
-	UseTestnet = false
 	// UseDemo switch all the API endpoints from production to the demo
 	UseDemo  = false
 	ProxyUrl = ""
 )
 
 // getWsEndpoint return the base endpoint of the WS according the UseTestnet flag
-func getWsEndpoint() string {
-	if UseTestnet {
+func getWsEndpoint(useTestnet bool) string {
+	if useTestnet {
 		return BaseWsTestnetUrl
 	}
 	if UseDemo {
@@ -70,8 +70,9 @@ type WsAggTradeEvent struct {
 type WsAggTradeHandler func(event *WsAggTradeEvent)
 
 // WsAggTradeServe serve websocket that push trade information that is aggregated for a single taker order.
-func WsAggTradeServe(symbol string, handler WsAggTradeHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@aggTrade", getWsEndpoint(), strings.ToLower(symbol))
+func WsAggTradeServe(symbol string, handler WsAggTradeHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@aggTrade", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsAggTradeEvent)
@@ -97,8 +98,9 @@ type WsIndexPriceEvent struct {
 type WsIndexPriceHandler func(event *WsIndexPriceEvent)
 
 // WsIndexPriceServe serve websocket that pushes index price for a pair.
-func WsIndexPriceServe(symbol string, handler WsIndexPriceHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@indexPrice", getWsEndpoint(), strings.ToLower(symbol))
+func WsIndexPriceServe(symbol string, handler WsIndexPriceHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@indexPrice", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsIndexPriceEvent)
@@ -127,8 +129,9 @@ type WsMarkPriceEvent struct {
 type WsMarkPriceHandler func(event *WsMarkPriceEvent)
 
 // WsMarkPriceServe serve websocket that pushes price and funding rate for a single symbol.
-func WsMarkPriceServe(symbol string, handler WsMarkPriceHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@markPrice", getWsEndpoint(), strings.ToLower(symbol))
+func WsMarkPriceServe(symbol string, handler WsMarkPriceHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@markPrice", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsMarkPriceEvent)
@@ -149,8 +152,9 @@ type WsPairMarkPriceEvent []*WsMarkPriceEvent
 type WsPairMarkPriceHandler func(event WsPairMarkPriceEvent)
 
 // WsPairMarkPriceServe serve websocket that pushes price and funding rate for all symbol.
-func WsPairMarkPriceServe(handler WsPairMarkPriceHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/markPrice@arr", getWsEndpoint())
+func WsPairMarkPriceServe(handler WsPairMarkPriceHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/markPrice@arr", getWsEndpoint(clientConfig.UseTestnet))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		var event WsPairMarkPriceEvent
@@ -196,8 +200,9 @@ type WsKline struct {
 type WsKlineHandler func(event *WsKlineEvent)
 
 // WsKlineServe serve websocket kline handler with a symbol and interval like 15m, 30s
-func WsKlineServe(symbol string, interval string, handler WsKlineHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@kline_%s", getWsEndpoint(), strings.ToLower(symbol), interval)
+func WsKlineServe(symbol string, interval string, handler WsKlineHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@kline_%s", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol), interval)
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsKlineEvent)
@@ -243,8 +248,9 @@ type WsContinuousKline struct {
 type WsContinuousKlineHandler func(event *WsContinuousKlineEvent)
 
 // WsContinuousKlineServe serve websocket kline handler with a pair, a contract type and interval like 15m, 30s
-func WsContinuousKlineServe(pair string, contractType string, interval string, handler WsContinuousKlineHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s_%s@continuousKline_%s", getWsEndpoint(), strings.ToLower(pair), strings.ToLower(contractType), interval)
+func WsContinuousKlineServe(pair string, contractType string, interval string, handler WsContinuousKlineHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s_%s@continuousKline_%s", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(pair), strings.ToLower(contractType), interval)
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsContinuousKlineEvent)
@@ -284,8 +290,9 @@ type WsIndexPriceKline struct {
 type WsIndexPriceKlineHandler func(event *WsIndexPriceKlineEvent)
 
 // WsIndexPriceKlineServe serve websocket kline handler with a pair and interval like 15m, 30s
-func WsIndexPriceKlineServe(pair string, interval string, handler WsIndexPriceKlineHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@indexPriceKline_%s", getWsEndpoint(), strings.ToLower(pair), interval)
+func WsIndexPriceKlineServe(pair string, interval string, handler WsIndexPriceKlineHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@indexPriceKline_%s", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(pair), interval)
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsIndexPriceKlineEvent)
@@ -326,8 +333,9 @@ type WsMarkPriceKline struct {
 type WsMarkPriceKlineHandler func(event *WsMarkPriceKlineEvent)
 
 // WsMarkPriceKlineServe serve websocket kline handler with a symbol and interval like 15m, 30s
-func WsMarkPriceKlineServe(symbol string, interval string, handler WsMarkPriceKlineHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@markPriceKline_%s", getWsEndpoint(), strings.ToLower(symbol), interval)
+func WsMarkPriceKlineServe(symbol string, interval string, handler WsMarkPriceKlineHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@markPriceKline_%s", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol), interval)
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsMarkPriceKlineEvent)
@@ -359,8 +367,9 @@ type WsMiniMarketTickerEvent struct {
 type WsMiniMarketTickerHandler func(event *WsMiniMarketTickerEvent)
 
 // WsMiniMarketTickerServe serve websocket that pushes 24hr rolling window mini-ticker statistics for a single symbol.
-func WsMiniMarketTickerServe(symbol string, handler WsMiniMarketTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@miniTicker", getWsEndpoint(), strings.ToLower(symbol))
+func WsMiniMarketTickerServe(symbol string, handler WsMiniMarketTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@miniTicker", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsMiniMarketTickerEvent)
@@ -381,8 +390,9 @@ type WsAllMiniMarketTickerEvent []*WsMiniMarketTickerEvent
 type WsAllMiniMarketTickerHandler func(event WsAllMiniMarketTickerEvent)
 
 // WsAllMiniMarketTickerServe serve websocket that pushes price and funding rate for all markets.
-func WsAllMiniMarketTickerServe(handler WsAllMiniMarketTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/!miniTicker@arr", getWsEndpoint())
+func WsAllMiniMarketTickerServe(handler WsAllMiniMarketTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/!miniTicker@arr", getWsEndpoint(clientConfig.UseTestnet))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		var event WsAllMiniMarketTickerEvent
@@ -423,8 +433,9 @@ type WsMarketTickerEvent struct {
 type WsMarketTickerHandler func(event *WsMarketTickerEvent)
 
 // WsMarketTickerServe serve websocket that pushes 24hr rolling window mini-ticker statistics for a single symbol.
-func WsMarketTickerServe(symbol string, handler WsMarketTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@ticker", getWsEndpoint(), strings.ToLower(symbol))
+func WsMarketTickerServe(symbol string, handler WsMarketTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@ticker", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsMarketTickerEvent)
@@ -445,8 +456,9 @@ type WsAllMarketTickerEvent []*WsMarketTickerEvent
 type WsAllMarketTickerHandler func(event WsAllMarketTickerEvent)
 
 // WsAllMarketTickerServe serve websocket that pushes price and funding rate for all markets.
-func WsAllMarketTickerServe(handler WsAllMarketTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/!ticker@arr", getWsEndpoint())
+func WsAllMarketTickerServe(handler WsAllMarketTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/!ticker@arr", getWsEndpoint(clientConfig.UseTestnet))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		var event WsAllMarketTickerEvent
@@ -478,8 +490,9 @@ type WsBookTickerEvent struct {
 type WsBookTickerHandler func(event *WsBookTickerEvent)
 
 // WsBookTickerServe serve websocket that pushes updates to the best bid or ask price or quantity in real-time for a specified symbol.
-func WsBookTickerServe(symbol string, handler WsBookTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@bookTicker", getWsEndpoint(), strings.ToLower(symbol))
+func WsBookTickerServe(symbol string, handler WsBookTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@bookTicker", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsBookTickerEvent)
@@ -494,8 +507,9 @@ func WsBookTickerServe(symbol string, handler WsBookTickerHandler, errHandler Er
 }
 
 // WsAllBookTickerServe serve websocket that pushes updates to the best bid or ask price or quantity in real-time for all symbols.
-func WsAllBookTickerServe(handler WsBookTickerHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/!bookTicker", getWsEndpoint())
+func WsAllBookTickerServe(handler WsBookTickerHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/!bookTicker", getWsEndpoint(clientConfig.UseTestnet))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsBookTickerEvent)
@@ -536,8 +550,9 @@ type WsLiquidationOrder struct {
 type WsLiquidationOrderHandler func(event *WsLiquidationOrderEvent)
 
 // WsLiquidationOrderServe serve websocket that pushes force liquidation order information for specific symbol.
-func WsLiquidationOrderServe(symbol string, handler WsLiquidationOrderHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s@forceOrder", getWsEndpoint(), strings.ToLower(symbol))
+func WsLiquidationOrderServe(symbol string, handler WsLiquidationOrderHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s@forceOrder", getWsEndpoint(clientConfig.UseTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsLiquidationOrderEvent)
@@ -552,8 +567,9 @@ func WsLiquidationOrderServe(symbol string, handler WsLiquidationOrderHandler, e
 }
 
 // WsAllLiquidationOrderServe serve websocket that pushes force liquidation order information for all symbols.
-func WsAllLiquidationOrderServe(handler WsLiquidationOrderHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/!forceOrder@arr", getWsEndpoint())
+func WsAllLiquidationOrderServe(handler WsLiquidationOrderHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/!forceOrder@arr", getWsEndpoint(clientConfig.UseTestnet))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsLiquidationOrderEvent)
@@ -584,35 +600,39 @@ type WsDepthEvent struct {
 // WsDepthHandler handle websocket depth event
 type WsDepthHandler func(event *WsDepthEvent)
 
-func wsPartialDepthServe(symbol string, levels int, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
+func wsPartialDepthServe(endpoint, symbol string, levels int, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
 	if levels != 5 && levels != 10 && levels != 20 {
-		return nil, nil, errors.New("Invalid levels")
+		return nil, nil, errors.New("invalid levels")
 	}
 	levelsStr := fmt.Sprintf("%d", levels)
-	return wsDepthServe(symbol, levelsStr, rate, handler, errHandler)
+	return wsDepthServe(endpoint, symbol, levelsStr, rate, handler, errHandler)
 }
 
 // WsPartialDepthServe serve websocket partial depth handler.
-func WsPartialDepthServe(symbol string, levels int, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	return wsPartialDepthServe(symbol, levels, nil, handler, errHandler)
+func WsPartialDepthServe(symbol string, levels int, handler WsDepthHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	return wsPartialDepthServe(getWsEndpoint(clientConfig.UseTestnet), symbol, levels, nil, handler, errHandler)
 }
 
 // WsPartialDepthServeWithRate serve websocket partial depth handler with rate.
-func WsPartialDepthServeWithRate(symbol string, levels int, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	return wsPartialDepthServe(symbol, levels, rate, handler, errHandler)
+func WsPartialDepthServeWithRate(symbol string, levels int, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	return wsPartialDepthServe(getWsEndpoint(clientConfig.UseTestnet), symbol, levels, rate, handler, errHandler)
 }
 
 // WsDiffDepthServe serve websocket diff. depth handler.
-func WsDiffDepthServe(symbol string, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	return wsDepthServe(symbol, "", nil, handler, errHandler)
+func WsDiffDepthServe(symbol string, handler WsDepthHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	return wsDepthServe(getWsEndpoint(clientConfig.UseTestnet), symbol, "", nil, handler, errHandler)
 }
 
 // WsDiffDepthServe serve websocket diff. depth handler with rate.
-func WsDiffDepthServeWithRate(symbol string, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	return wsDepthServe(symbol, "", rate, handler, errHandler)
+func WsDiffDepthServeWithRate(symbol string, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	return wsDepthServe(getWsEndpoint(clientConfig.UseTestnet), symbol, "", rate, handler, errHandler)
 }
 
-func wsDepthServe(symbol string, levels string, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
+func wsDepthServe(endpoint, symbol string, levels string, rate *time.Duration, handler WsDepthHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
 	var rateStr string
 	if rate != nil {
 		switch *rate {
@@ -627,7 +647,7 @@ func wsDepthServe(symbol string, levels string, rate *time.Duration, handler WsD
 		}
 	}
 
-	endpoint := fmt.Sprintf("%s/%s@depth%s%s", getWsEndpoint(), strings.ToLower(symbol), levels, rateStr)
+	endpoint = fmt.Sprintf("%s/%s@depth%s%s", endpoint, strings.ToLower(symbol), levels, rateStr)
 	cfg := newWsConfig(endpoint)
 
 	wsHandler := func(message []byte) {
@@ -792,8 +812,9 @@ type WsAccountConfigUpdate struct {
 type WsUserDataHandler func(event *WsUserDataEvent)
 
 // WsUserDataServe serve user data handler with listen key
-func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, err error) {
-	endpoint := fmt.Sprintf("%s/%s", getWsEndpoint(), listenKey)
+func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler ErrHandler, opts ...common.ClientOptionFunc) (doneC, stopC chan struct{}, err error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	endpoint := fmt.Sprintf("%s/%s", getWsEndpoint(clientConfig.UseTestnet), listenKey)
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)

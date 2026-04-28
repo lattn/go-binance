@@ -19,8 +19,9 @@ type AlgoOrderCancelWsService struct {
 }
 
 // NewAlgoOrderCancelWsService init AlgoOrderCancelWsService
-func NewAlgoOrderCancelWsService(apiKey, secretKey string) (*AlgoOrderCancelWsService, error) {
-	conn, err := websocket.NewConnection(futures.WsApiInitReadWriteConn, futures.WebsocketKeepalive, futures.WebsocketTimeoutReadWriteConnection)
+func NewAlgoOrderCancelWsService(apiKey, secretKey string, opts ...common.ClientOptionFunc) (*AlgoOrderCancelWsService, error) {
+	clientConfig := common.ParseClientConfig(opts...)
+	conn, err := websocket.NewConnection(futures.WrapWsApiInitReadWriteConn(clientConfig.UseTestnet), futures.WebsocketKeepalive, futures.WebsocketTimeoutReadWriteConnection)
 	if err != nil {
 		return nil, err
 	}
