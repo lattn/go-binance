@@ -1210,6 +1210,7 @@ func WsContractInfoServe(handler WsContractInfoHandler, errHandler ErrHandler, o
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!contractInfo", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
+	cfg.Proxy = wscfg.Proxy
 	wsHandler := func(message []byte) {
 		event := new(WsContractInfoEvent)
 		err := json.Unmarshal(message, event)
@@ -1249,6 +1250,7 @@ func WsAssetIndexServe(symbol string, handler WsAssetIndexHandler, errHandler Er
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@assetIndex", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
+	cfg.Proxy = wscfg.Proxy
 	wsHandler := func(message []byte) {
 		event := new(WsAssetIndexEvent)
 		err := json.Unmarshal(message, event)
@@ -1269,6 +1271,7 @@ func WsAllAssetIndexServe(handler WsAllAssetIndexHandler, errHandler ErrHandler,
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!assetIndex@arr", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
+	cfg.Proxy = wscfg.Proxy
 	wsHandler := func(message []byte) {
 		var event WsAllAssetIndexEvent
 		err := json.Unmarshal(message, &event)
@@ -1501,6 +1504,7 @@ func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler Err
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s?listenKey=%s", getWsPrivateEndpoint(wscfg.IsTestnet), listenKey)
 	cfg := newWsConfig(endpoint)
+	cfg.Proxy = wscfg.Proxy
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)
 		err := json.Unmarshal(message, event)
@@ -1522,6 +1526,7 @@ func WsUserDataServeWithEvents(listenKey string, events []string, handler WsUser
 		endpoint += "&events=" + strings.Join(events, "/")
 	}
 	cfg := newWsConfig(endpoint)
+	cfg.Proxy = wscfg.Proxy
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)
 		err := json.Unmarshal(message, event)
