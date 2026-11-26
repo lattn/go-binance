@@ -172,7 +172,7 @@ func WsAggTradeServe(symbol string, handler WsAggTradeHandler, errHandler ErrHan
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@aggTrade", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsAggTradeEvent)
 		err := json.Unmarshal(message, &event)
@@ -194,7 +194,7 @@ func WsCombinedAggTradeServe(symbols []string, handler WsAggTradeHandler, errHan
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -240,7 +240,7 @@ type WsMarkPriceHandler func(event *WsMarkPriceEvent)
 func wsMarkPriceServe(endpoint string, handler WsMarkPriceHandler, errHandler ErrHandler, opts ...common.WsOption) (doneC, stopC chan struct{}, err error) {
 	wscfg := common.ResolveWsConfig(opts...)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsMarkPriceEvent)
 		err := json.Unmarshal(message, &event)
@@ -279,7 +279,7 @@ func WsMarkPriceServeWithRate(symbol string, rate time.Duration, handler WsMarkP
 func wsCombinedMarkPriceServe(endpoint string, handler WsMarkPriceHandler, errHandler ErrHandler, opts ...common.WsOption) (doneC, stopC chan struct{}, err error) {
 	wscfg := common.ResolveWsConfig(opts...)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -347,7 +347,7 @@ type WsAllMarkPriceHandler func(event WsAllMarkPriceEvent)
 func wsAllMarkPriceServe(endpoint string, handler WsAllMarkPriceHandler, errHandler ErrHandler, opts ...common.WsOption) (doneC, stopC chan struct{}, err error) {
 	wscfg := common.ResolveWsConfig(opts...)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		var event WsAllMarkPriceEvent
 		err := json.Unmarshal(message, &event)
@@ -419,7 +419,7 @@ func WsKlineServe(symbol string, interval string, handler WsKlineHandler, errHan
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@kline_%s", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol), interval)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsKlineEvent)
 		err := json.Unmarshal(message, event)
@@ -441,7 +441,7 @@ func WsCombinedKlineServe(symbolIntervalPair map[string]string, handler WsKlineH
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -480,7 +480,7 @@ func WsCombinedKlineServeMultiInterval(symbolIntervals map[string][]string, hand
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -553,7 +553,7 @@ func WsContinuousKlineServe(subscribeArgs *WsContinuousKlineSubscribeArgs, handl
 	endpoint := fmt.Sprintf("%s/%s_%s@continuousKline_%s", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(subscribeArgs.Pair),
 		strings.ToLower(subscribeArgs.ContractType), subscribeArgs.Interval)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsContinuousKlineEvent)
 		err := json.Unmarshal(message, event)
@@ -577,7 +577,7 @@ func WsCombinedContinuousKlineServe(subscribeArgsList []*WsContinuousKlineSubscr
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -622,7 +622,7 @@ func WsMiniMarketTickerServe(symbol string, handler WsMiniMarketTickerHandler, e
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@miniTicker", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsMiniMarketTickerEvent)
 		err := json.Unmarshal(message, &event)
@@ -646,7 +646,7 @@ func WsAllMiniMarketTickerServe(handler WsAllMiniMarketTickerHandler, errHandler
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!miniTicker@arr", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		var event WsAllMiniMarketTickerEvent
 		err := json.Unmarshal(message, &event)
@@ -689,7 +689,7 @@ func WsMarketTickerServe(symbol string, handler WsMarketTickerHandler, errHandle
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@ticker", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsMarketTickerEvent)
 		err := json.Unmarshal(message, &event)
@@ -713,7 +713,7 @@ func WsAllMarketTickerServe(handler WsAllMarketTickerHandler, errHandler ErrHand
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!ticker@arr", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		var event WsAllMarketTickerEvent
 		err := json.Unmarshal(message, &event)
@@ -752,7 +752,7 @@ func WsBookTickerServe(symbol string, handler WsBookTickerHandler, errHandler Er
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@bookTicker", getWsPublicEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsBookTickerEvent)
 		err := json.Unmarshal(message, &event)
@@ -773,7 +773,7 @@ func WsCombinedBookTickerServe(symbols []string, handler WsBookTickerHandler, er
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsCombinedBookTickerEvent)
 		err := json.Unmarshal(message, event)
@@ -791,7 +791,7 @@ func WsAllBookTickerServe(handler WsBookTickerHandler, errHandler ErrHandler, op
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!bookTicker", getWsPublicEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsBookTickerEvent)
 		err := json.Unmarshal(message, &event)
@@ -834,7 +834,7 @@ func WsLiquidationOrderServe(symbol string, handler WsLiquidationOrderHandler, e
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@forceOrder", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsLiquidationOrderEvent)
 		err := json.Unmarshal(message, &event)
@@ -852,7 +852,7 @@ func WsAllLiquidationOrderServe(handler WsLiquidationOrderHandler, errHandler Er
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!forceOrder@arr", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsLiquidationOrderEvent)
 		err := json.Unmarshal(message, &event)
@@ -913,7 +913,7 @@ func WsCombinedDepthServe(symbolLevels map[string]string, handler WsDepthHandler
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -961,7 +961,7 @@ func WsCombinedDiffDepthServe(symbols []string, handler WsDepthHandler, errHandl
 	}
 	endpoint = endpoint[:len(endpoint)-1]
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -1022,7 +1022,7 @@ func wsDepthServe(symbol string, levels string, rate *time.Duration, handler WsD
 	}
 	endpoint := fmt.Sprintf("%s/%s@depth%s%s", getWsPublicEndpoint(wscfg.IsTestnet), strings.ToLower(symbol), levels, rateStr)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		j, err := newJSON(message)
 		if err != nil {
@@ -1087,7 +1087,7 @@ func WsBLVTInfoServe(name string, handler WsBLVTInfoHandler, errHandler ErrHandl
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@tokenNav", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToUpper(name))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsBLVTInfoEvent)
 		err := json.Unmarshal(message, &event)
@@ -1132,7 +1132,7 @@ func WsBLVTKlineServe(name string, interval string, handler WsBLVTKlineHandler, 
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@nav_Kline_%s", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToUpper(name), interval)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsBLVTKlineEvent)
 		err := json.Unmarshal(message, event)
@@ -1172,7 +1172,7 @@ func WsCompositiveIndexServe(symbol string, handler WsCompositeIndexHandler, err
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@compositeIndex", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsCompositeIndexEvent)
 		err := json.Unmarshal(message, event)
@@ -1210,7 +1210,7 @@ func WsContractInfoServe(handler WsContractInfoHandler, errHandler ErrHandler, o
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!contractInfo", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsContractInfoEvent)
 		err := json.Unmarshal(message, event)
@@ -1250,7 +1250,7 @@ func WsAssetIndexServe(symbol string, handler WsAssetIndexHandler, errHandler Er
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/%s@assetIndex", getWsMarketEndpoint(wscfg.IsTestnet), strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsAssetIndexEvent)
 		err := json.Unmarshal(message, event)
@@ -1271,7 +1271,7 @@ func WsAllAssetIndexServe(handler WsAllAssetIndexHandler, errHandler ErrHandler,
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s/!assetIndex@arr", getWsMarketEndpoint(wscfg.IsTestnet))
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		var event WsAllAssetIndexEvent
 		err := json.Unmarshal(message, &event)
@@ -1504,7 +1504,7 @@ func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler Err
 	wscfg := common.ResolveWsConfig(opts...)
 	endpoint := fmt.Sprintf("%s?listenKey=%s", getWsPrivateEndpoint(wscfg.IsTestnet), listenKey)
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)
 		err := json.Unmarshal(message, event)
@@ -1526,7 +1526,7 @@ func WsUserDataServeWithEvents(listenKey string, events []string, handler WsUser
 		endpoint += "&events=" + strings.Join(events, "/")
 	}
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)
 		err := json.Unmarshal(message, event)
@@ -1563,7 +1563,7 @@ func WsUserDataServeMultiple(configs []WsPrivateStreamConfig, handler WsUserData
 	}
 	endpoint += "?" + params
 	cfg := newWsConfig(endpoint)
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	wsHandler := func(message []byte) {
 		event := new(WsUserDataEvent)
 		err := json.Unmarshal(message, event)
@@ -1586,7 +1586,7 @@ func WrapWsApiInitReadWriteConn(opts ...common.WsOption) func() (*websocket.Conn
 func WsApiInitReadWriteConn(opts ...common.WsOption) (*websocket.Conn, error) {
 	wscfg := common.ResolveWsConfig(opts...)
 	cfg := newWsConfig(getWsApiEndpoint(wscfg.IsTestnet))
-	cfg.Proxy = wscfg.Proxy
+	applyWsOptions(cfg, wscfg)
 	conn, err := WsGetReadWriteConnection(cfg)
 	if err != nil {
 		return nil, err
@@ -1604,4 +1604,10 @@ func getWsApiEndpoint(isTestnet bool) string {
 		return BaseWsApiDemoURL
 	}
 	return BaseWsApiMainURL
+}
+
+func applyWsOptions(cfg *WsConfig, opts *common.WsConfig) {
+	if cfg.Proxy == nil || *cfg.Proxy == "" {
+		cfg.Proxy = opts.Proxy
+	}
 }
