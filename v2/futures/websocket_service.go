@@ -75,7 +75,7 @@ func SetWsProxyUrl(url string) {
 
 // getWsEndpoint return the base endpoint of the WS according the UseTestnet flag
 func getWsEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseWsTestnetUrl
 	}
 	if UseDemo {
@@ -86,7 +86,7 @@ func getWsEndpoint(testnet bool) string {
 
 // getCombinedEndpoint return the base endpoint of the combined stream according the UseTestnet flag
 func getCombinedEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseCombinedTestnetURL
 	}
 	if UseDemo {
@@ -97,7 +97,7 @@ func getCombinedEndpoint(testnet bool) string {
 
 // getWsPublicEndpoint return the base endpoint for high-frequency public data (bookTicker, depth)
 func getWsPublicEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseWsPublicTestnetUrl
 	}
 	if UseDemo {
@@ -108,7 +108,7 @@ func getWsPublicEndpoint(testnet bool) string {
 
 // getCombinedPublicEndpoint return the combined stream endpoint for public data
 func getCombinedPublicEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseCombinedPublicTestnetURL
 	}
 	if UseDemo {
@@ -119,7 +119,7 @@ func getCombinedPublicEndpoint(testnet bool) string {
 
 // getWsMarketEndpoint return the base endpoint for regular market data (aggTrade, markPrice, kline, ticker, etc.)
 func getWsMarketEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseWsMarketTestnetUrl
 	}
 	if UseDemo {
@@ -130,7 +130,7 @@ func getWsMarketEndpoint(testnet bool) string {
 
 // getCombinedMarketEndpoint return the combined stream endpoint for market data
 func getCombinedMarketEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseCombinedMarketTestnetURL
 	}
 	if UseDemo {
@@ -141,7 +141,7 @@ func getCombinedMarketEndpoint(testnet bool) string {
 
 // getWsPrivateEndpoint return the base endpoint for private user data streams
 func getWsPrivateEndpoint(testnet bool) string {
-	if testnet {
+	if UseTestnet || testnet {
 		return BaseWsPrivateTestnetUrl
 	}
 	if UseDemo {
